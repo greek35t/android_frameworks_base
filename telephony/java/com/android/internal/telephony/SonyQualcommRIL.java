@@ -439,6 +439,7 @@ public class SonyQualcommRIL extends RIL implements CommandsInterface {
                                     case APPTYPE_SIM:
                                     case APPTYPE_USIM:
                                     case APPTYPE_RUIM:
+                                    case APPTYPE_CSIM:
                                         mRil.setRadioState(CommandsInterface.RadioState.RADIO_ON);
                                         break;
                                     default:
@@ -451,6 +452,7 @@ public class SonyQualcommRIL extends RIL implements CommandsInterface {
                                     case APPTYPE_SIM:
                                     case APPTYPE_USIM:
                                     case APPTYPE_RUIM:
+                                    case APPTYPE_CSIM:
                                         mRil.setRadioState(CommandsInterface.RadioState.RADIO_ON);
                                         break;
                                     default:
