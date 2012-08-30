@@ -2443,7 +2443,7 @@ public class BluetoothService extends IBluetooth.Stub {
         if (SystemProperties.OMAP_ENHANCEMENT) {
             BluetoothDeviceProfileState oldStateMachine  = mDeviceProfileState.put(address, state);
             if (oldStateMachine != null) {
-                oldStateMachine.quit();
+                oldStateMachine.doQuit();
                 oldStateMachine = null;
             }
         } else {
