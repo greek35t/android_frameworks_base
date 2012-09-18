@@ -61,7 +61,8 @@ public:
           mMinSdkVersion(NULL), mTargetSdkVersion(NULL), mMaxSdkVersion(NULL),
           mVersionCode(NULL), mVersionName(NULL), mCustomPackage(NULL), mExtraPackages(NULL),
           mMaxResVersion(NULL), mDebugMode(false), mNonConstantId(false), mProduct(NULL),
-          mUseCrunchCache(false), mArgc(0), mArgv(NULL)
+          mUseCrunchCache(false), mErrorOnFailedInsert(false), mOutputTextSymbols(NULL),
+          mArgc(0), mArgv(NULL)
         {}
     ~Bundle(void) {}
 
@@ -110,6 +111,8 @@ public:
     void setAutoAddOverlay(bool val) { mAutoAddOverlay = val; }
     bool getGenDependencies() { return mGenDependencies; }
     void setGenDependencies(bool val) { mGenDependencies = val; }
+    bool getErrorOnFailedInsert() { return mErrorOnFailedInsert; }
+    void setErrorOnFailedInsert(bool val) { mErrorOnFailedInsert = val; }
 
     bool getUTF16StringsOption() {
         return mWantUTF16 || !isMinSdkAtLeast(SDK_FROYO);
@@ -171,6 +174,8 @@ public:
     void setProduct(const char * val) { mProduct = val; }
     void setUseCrunchCache(bool val) { mUseCrunchCache = val; }
     bool getUseCrunchCache() const { return mUseCrunchCache; }
+    const char* getOutputTextSymbols() const { return mOutputTextSymbols; }
+    void setOutputTextSymbols(const char* val) { mOutputTextSymbols = val; }
 
     /*
      * Set and get the file specification.
@@ -276,6 +281,8 @@ private:
     bool        mNonConstantId;
     const char* mProduct;
     bool        mUseCrunchCache;
+    bool        mErrorOnFailedInsert;
+    const char* mOutputTextSymbols;
 
     /* file specification */
     int         mArgc;

@@ -69,7 +69,8 @@ void usage(void)
         "        [-F apk-file] [-J R-file-dir] \\\n"
         "        [--product product1,product2,...] \\\n"
         "        [-c CONFIGS] [--preferred-configurations CONFIGS] \\\n"
-        "        [raw-files-dir [raw-files-dir] ...]\n"
+        "        [raw-files-dir [raw-files-dir] ...] \\\n"
+        "        [--output-text-symbols DIR]\n"
         "\n"
         "   Package the android resources.  It will read assets and resources that are\n"
         "   supplied with the -M -A -S or raw-files-dir arguments.  The -J -P -F and -R\n"
@@ -177,6 +178,14 @@ void usage(void)
         "       Make the resources ID non constant. This is required to make an R java class\n"
         "       that does not contain the final value but is used to make reusable compiled\n"
         "       libraries that need to access resources.\n"
+        "   --error-on-failed-insert\n"
+        "       Forces aapt to return an error if it fails to insert values into the manifest\n"
+        "       with --debug-mode, --min-sdk-version, --target-sdk-version --version-code\n"
+        "       and --version-name.\n"
+        "       Insertion typically fails if the manifest already defines the attribute.\n"
+        "   --output-text-symbols\n"
+        "       Generates a text file containing the resource symbols of the R class in the\n"
+        "       specified folder.\n"
         "   --ignore-assets\n"
         "       Assets to be ignored. Default pattern is:\n"
         "       %s\n",
@@ -542,6 +551,17 @@ int main(int argc, char* const argv[])
                     bundle.setInstrumentationPackageNameOverride(argv[0]);
                 } else if (strcmp(cp, "-auto-add-overlay") == 0) {
                     bundle.setAutoAddOverlay(true);
+                } else if (strcmp(cp, "-error-on-failed-insert") == 0) {
+                    bundle.setErrorOnFailedInsert(true);
+                } else if (strcmp(cp, "-output-text-symbols") == 0) {
+                    argc--;
+                    argv++;
+                    if (!argc) {
+                        fprintf(stderr, "ERROR: No argument supplied for '-output-text-symbols' option\n");
+                        wantUsage = true;
+                        goto bail;
+                    }
+                    bundle.setOutputTextSymbols(argv[0]);
                 } else if (strcmp(cp, "-product") == 0) {
                     argc--;
                     argv++;
