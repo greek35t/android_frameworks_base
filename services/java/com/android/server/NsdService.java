@@ -31,6 +31,7 @@ import android.os.HandlerThread;
 import android.os.Message;
 import android.os.Messenger;
 import android.os.IBinder;
+import android.os.UserHandle;
 import android.provider.Settings;
 import android.util.Slog;
 import android.util.SparseArray;
@@ -130,7 +131,7 @@ public class NsdService extends INsdManager.Stub {
             };
 
             mContext.getContentResolver().registerContentObserver(
-                    Settings.Secure.getUriFor(Settings.Secure.NSD_ON),
+                    Settings.Global.getUriFor(Settings.Global.NSD_ON),
                     false, contentObserver);
         }
 
@@ -432,7 +433,7 @@ public class NsdService extends INsdManager.Stub {
     public void setEnabled(boolean enable) {
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.CONNECTIVITY_INTERNAL,
                 "NsdService");
-        Settings.Secure.putInt(mContentResolver, Settings.Secure.NSD_ON, enable ? 1 : 0);
+        Settings.Global.putInt(mContentResolver, Settings.Global.NSD_ON, enable ? 1 : 0);
         if (enable) {
             mNsdStateMachine.sendMessage(NsdManager.ENABLE);
         } else {
@@ -448,11 +449,11 @@ public class NsdService extends INsdManager.Stub {
         } else {
             intent.putExtra(NsdManager.EXTRA_NSD_STATE, NsdManager.NSD_STATE_DISABLED);
         }
-        mContext.sendStickyBroadcast(intent);
+        mContext.sendStickyBroadcastAsUser(intent, UserHandle.ALL);
     }
 
     private boolean isNsdEnabled() {
-        boolean ret = Settings.Secure.getInt(mContentResolver, Settings.Secure.NSD_ON, 1) == 1;
+        boolean ret = Settings.Global.getInt(mContentResolver, Settings.Global.NSD_ON, 1) == 1;
         if (DBG) Slog.d(TAG, "Network service discovery enabled " + ret);
         return ret;
     }

@@ -74,10 +74,12 @@ LOCAL_SRC_FILES += \
 	core/java/android/app/ISearchManager.aidl \
 	core/java/android/app/ISearchManagerCallback.aidl \
 	core/java/android/app/IServiceConnection.aidl \
+	core/java/android/app/IStopUserCallback.aidl \
 	core/java/android/app/IThumbnailReceiver.aidl \
 	core/java/android/app/IThumbnailRetriever.aidl \
 	core/java/android/app/ITransientNotification.aidl \
 	core/java/android/app/IUiModeManager.aidl \
+    core/java/android/app/IUserSwitchObserver.aidl \
 	core/java/android/app/IWallpaperManager.aidl \
 	core/java/android/app/IWallpaperManagerCallback.aidl \
 	core/java/android/app/admin/IDevicePolicyManager.aidl \
@@ -89,7 +91,13 @@ LOCAL_SRC_FILES += \
 	core/java/android/bluetooth/IBluetoothA2dp.aidl \
 	core/java/android/bluetooth/IBluetoothCallback.aidl \
 	core/java/android/bluetooth/IBluetoothHeadset.aidl \
+	core/java/android/bluetooth/IBluetoothHeadsetPhone.aidl \
+	core/java/android/bluetooth/IBluetoothHealth.aidl \
 	core/java/android/bluetooth/IBluetoothHealthCallback.aidl \
+	core/java/android/bluetooth/IBluetoothInputDevice.aidl \
+	core/java/android/bluetooth/IBluetoothPan.aidl \
+	core/java/android/bluetooth/IBluetoothManager.aidl \
+	core/java/android/bluetooth/IBluetoothManagerCallback.aidl \
 	core/java/android/bluetooth/IBluetoothPbap.aidl \
 	core/java/android/bluetooth/IBluetoothStateChangeCallback.aidl \
 	core/java/android/content/IClipboard.aidl \
@@ -108,6 +116,8 @@ LOCAL_SRC_FILES += \
 	core/java/android/content/pm/IPackageStatsObserver.aidl \
 	core/java/android/database/IContentObserver.aidl \
 	core/java/android/hardware/ISerialManager.aidl \
+	core/java/android/hardware/display/IDisplayManager.aidl \
+	core/java/android/hardware/display/IDisplayManagerCallback.aidl \
 	core/java/android/hardware/input/IInputManager.aidl \
 	core/java/android/hardware/input/IInputDevicesChangedListener.aidl \
 	core/java/android/hardware/usb/IUsbManager.aidl \
@@ -132,6 +142,7 @@ LOCAL_SRC_FILES += \
 	core/java/android/os/IRemoteCallback.aidl \
 	core/java/android/os/ISchedulingPolicyService.aidl \
 	core/java/android/os/IUpdateLock.aidl \
+        core/java/android/os/IUserManager.aidl \
 	core/java/android/os/IVibratorService.aidl \
 	core/java/android/service/dreams/IDreamManager.aidl \
 	core/java/android/service/dreams/IDreamService.aidl \
@@ -143,6 +154,9 @@ LOCAL_SRC_FILES += \
 	core/java/android/view/accessibility/IAccessibilityManager.aidl \
 	core/java/android/view/accessibility/IAccessibilityManagerClient.aidl \
 	core/java/android/view/IApplicationToken.aidl \
+	core/java/android/view/IDisplayContentChangeListener.aidl \
+	core/java/android/view/IInputFilter.aidl \
+	core/java/android/view/IInputFilterHost.aidl \
 	core/java/android/view/IOnKeyguardExitResult.aidl \
 	core/java/android/view/IRotationWatcher.aidl \
 	core/java/android/view/IWindow.aidl \
@@ -188,8 +202,8 @@ LOCAL_SRC_FILES += \
 	location/java/android/location/IGpsStatusProvider.aidl \
 	location/java/android/location/ILocationListener.aidl \
 	location/java/android/location/ILocationManager.aidl \
-	location/java/android/location/ILocationProvider.aidl \
 	location/java/android/location/INetInitiatedListener.aidl \
+	location/java/com/android/internal/location/ILocationProvider.aidl \
 	media/java/android/media/IAudioService.aidl \
 	media/java/android/media/IAudioFocusDispatcher.aidl \
 	media/java/android/media/IAudioRoutesObserver.aidl \
@@ -226,9 +240,6 @@ LOCAL_JAVA_LIBRARIES := bouncycastle core core-junit ext
 
 LOCAL_MODULE := framework
 LOCAL_MODULE_CLASS := JAVA_LIBRARIES
-
-LOCAL_NO_EMMA_INSTRUMENT := true
-LOCAL_NO_EMMA_COMPILE := true
 
 # List of classes and interfaces which should be loaded by the Zygote.
 LOCAL_JAVA_RESOURCE_FILES += $(LOCAL_PATH)/preloaded-classes
@@ -297,7 +308,11 @@ aidl_files := \
 	frameworks/base/graphics/java/android/graphics/Rect.aidl \
 	frameworks/base/graphics/java/android/graphics/Region.aidl \
 	frameworks/base/location/java/android/location/Criteria.aidl \
+	frameworks/base/location/java/android/location/Geofence.aidl \
 	frameworks/base/location/java/android/location/Location.aidl \
+	frameworks/base/location/java/android/location/LocationRequest.aidl \
+	frameworks/base/location/java/com/android/internal/location/ProviderProperties.aidl \
+	frameworks/base/location/java/com/android/internal/location/ProviderRequest.aidl \
 	frameworks/base/telephony/java/android/telephony/ServiceState.aidl \
 	frameworks/base/telephony/java/com/android/internal/telephony/IPhoneSubInfo.aidl \
 	frameworks/base/telephony/java/com/android/internal/telephony/ITelephony.aidl \
@@ -414,6 +429,7 @@ framework_docs_LOCAL_DROIDDOC_OPTIONS := \
     -since ./frameworks/base/api/14.txt 14 \
     -since ./frameworks/base/api/15.txt 15 \
     -since ./frameworks/base/api/16.txt 16 \
+    -since ./frameworks/base/api/17.txt 17 \
 		-werror -hide 113 \
 		-overview $(LOCAL_PATH)/core/java/overview.html
 
@@ -524,7 +540,7 @@ web_docs_sample_code_flags := \
 
 ## SDK version identifiers used in the published docs
   # major[.minor] version for current SDK. (full releases only)
-framework_docs_SDK_VERSION:=4.1
+framework_docs_SDK_VERSION:=4.2
   # release version (ie "Release x")  (full releases only)
 framework_docs_SDK_REL_ID:=1
 
@@ -710,9 +726,6 @@ LOCAL_JAVA_LIBRARIES := core
 LOCAL_JAVA_RESOURCE_DIRS := $(ext_res_dirs)
 LOCAL_MODULE_TAGS := optional
 LOCAL_MODULE := ext
-
-LOCAL_NO_EMMA_INSTRUMENT := true
-LOCAL_NO_EMMA_COMPILE := true
 
 LOCAL_DX_FLAGS := --core-library
 

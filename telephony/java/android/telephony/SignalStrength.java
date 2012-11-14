@@ -1,6 +1,5 @@
 /*
- * Copyright (C) 2009 Qualcomm Innovation Center, Inc.  All Rights Reserved.
- * Copyright (C) 2009 The Android Open Source Project
+ * Copyright (C) 2012 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -70,6 +69,7 @@ public class SignalStrength implements Parcelable {
     private int mLteCqi;
 
     private boolean isGsm; // This value is set by the ServiceStateTracker onSignalStrengthResult
+
     /**
      * Create a new SignalStrength from a intent notifier Bundle
      *
@@ -142,6 +142,83 @@ public class SignalStrength implements Parcelable {
             int cdmaDbm, int cdmaEcio,
             int evdoDbm, int evdoEcio, int evdoSnr,
             int lteSignalStrength, int lteRsrp, int lteRsrq, int lteRssnr, int lteCqi,
+            boolean gsmFlag) {
+        initialize(gsmSignalStrength, gsmBitErrorRate, cdmaDbm, cdmaEcio,
+                evdoDbm, evdoEcio, evdoSnr, lteSignalStrength, lteRsrp,
+                lteRsrq, lteRssnr, lteCqi, gsmFlag);
+    }
+
+    /**
+     * Constructor
+     *
+     * @hide
+     */
+    public SignalStrength(int gsmSignalStrength, int gsmBitErrorRate,
+            int cdmaDbm, int cdmaEcio,
+            int evdoDbm, int evdoEcio, int evdoSnr,
+            boolean gsmFlag) {
+        initialize(gsmSignalStrength, gsmBitErrorRate, cdmaDbm, cdmaEcio,
+                evdoDbm, evdoEcio, evdoSnr, 99, INVALID,
+                INVALID, INVALID, INVALID, gsmFlag);
+    }
+
+    /**
+     * Copy constructors
+     *
+     * @param s Source SignalStrength
+     *
+     * @hide
+     */
+    public SignalStrength(SignalStrength s) {
+        copyFrom(s);
+    }
+
+    /**
+     * Initialize gsm/cdma values, sets lte values to defaults.
+     *
+     * @param gsmSignalStrength
+     * @param gsmBitErrorRate
+     * @param cdmaDbm
+     * @param cdmaEcio
+     * @param evdoDbm
+     * @param evdoEcio
+     * @param evdoSnr
+     * @param gsm
+     *
+     * @hide
+     */
+    public void initialize(int gsmSignalStrength, int gsmBitErrorRate,
+            int cdmaDbm, int cdmaEcio,
+            int evdoDbm, int evdoEcio, int evdoSnr,
+            boolean gsm) {
+        initialize(gsmSignalStrength, gsmBitErrorRate, cdmaDbm, cdmaEcio,
+                evdoDbm, evdoEcio, evdoSnr, 99, INVALID,
+                INVALID, INVALID, INVALID, gsm);
+    }
+
+    /**
+     * Initialize all the values
+     *
+     * @param gsmSignalStrength
+     * @param gsmBitErrorRate
+     * @param cdmaDbm
+     * @param cdmaEcio
+     * @param evdoDbm
+     * @param evdoEcio
+     * @param evdoSnr
+     * @param lteSignalStrength
+     * @param lteRsrp
+     * @param lteRsrq
+     * @param lteRssnr
+     * @param lteCqi
+     * @param gsm
+     *
+     * @hide
+     */
+    public void initialize(int gsmSignalStrength, int gsmBitErrorRate,
+            int cdmaDbm, int cdmaEcio,
+            int evdoDbm, int evdoEcio, int evdoSnr,
+            int lteSignalStrength, int lteRsrp, int lteRsrq, int lteRssnr, int lteCqi,
             boolean gsm) {
         mGsmSignalStrength = gsmSignalStrength;
         mGsmBitErrorRate = gsmBitErrorRate;
@@ -156,30 +233,7 @@ public class SignalStrength implements Parcelable {
         mLteRssnr = lteRssnr;
         mLteCqi = lteCqi;
         isGsm = gsm;
-    }
-
-    /**
-     * Constructor
-     *
-     * @hide
-     */
-    public SignalStrength(int gsmSignalStrength, int gsmBitErrorRate,
-            int cdmaDbm, int cdmaEcio,
-            int evdoDbm, int evdoEcio, int evdoSnr,
-            boolean gsm) {
-         this(gsmSignalStrength, gsmBitErrorRate, cdmaDbm, cdmaEcio, evdoDbm, evdoEcio, evdoSnr, 99,
-                INVALID, INVALID, INVALID, INVALID, gsm);
-    }
-
-    /**
-     * Copy constructors
-     *
-     * @param s Source SignalStrength
-     *
-     * @hide
-     */
-    public SignalStrength(SignalStrength s) {
-        copyFrom(s);
+        if (DBG) log("initialize: " + toString());
     }
 
     /**
@@ -207,6 +261,8 @@ public class SignalStrength implements Parcelable {
      * @hide
      */
     public SignalStrength(Parcel in) {
+        if (DBG) log("Size of signalstrength parcel:" + in.dataSize());
+
         mGsmSignalStrength = in.readInt();
         mGsmBitErrorRate = in.readInt();
         mCdmaDbm = in.readInt();
@@ -366,6 +422,31 @@ public class SignalStrength implements Parcelable {
                 return true;
         }
         return false;
+
+    /** @hide */
+    public int getLteSignalStrenght() {
+        return mLteSignalStrength;
+    }
+
+    /** @hide */
+    public int getLteRsrp() {
+        return mLteRsrp;
+    }
+
+    /** @hide */
+    public int getLteRsrq() {
+        return mLteRsrq;
+    }
+
+    /** @hide */
+    public int getLteRssnr() {
+        return mLteRssnr;
+    }
+
+    /** @hide */
+    public int getLteCqi() {
+        return mLteCqi;
+>>>>>>> 4299f63e54dceeaaa44a057ba03f0881834491ec
     }
 
     /**

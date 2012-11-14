@@ -220,6 +220,7 @@ public class TelephonyManager {
     public CellLocation getCellLocation() {
         try {
             Bundle bundle = getITelephony().getCellLocation();
+            if (bundle.isEmpty()) return null;
             CellLocation cl = CellLocation.newFromBundle(bundle);
             if (cl.isEmpty())
                 return null;
@@ -1271,8 +1272,6 @@ public class TelephonyManager {
      *
      * <p>Requires Permission:
      * (@link android.Manifest.permission#ACCESS_COARSE_UPDATES}
-     *
-     * @hide pending API review
      */
     public List<CellInfo> getAllCellInfo() {
         try {

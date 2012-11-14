@@ -100,6 +100,10 @@ public class EthernetDataTracker implements NetworkStateTracker {
         public void limitReached(String limitName, String iface) {
             // Ignored.
         }
+
+        public void interfaceClassDataActivityChanged(String label, boolean active) {
+            // Ignored.
+        }
     }
 
     private EthernetDataTracker() {
@@ -235,6 +239,10 @@ public class EthernetDataTracker implements NetworkStateTracker {
                             mNetworkInfo.setExtraInfo(mHwAddr);
                         }
                     }
+
+                    // if a DHCP client had previously been started for this interface, then stop it
+                    NetworkUtils.stopDhcp(mIface);
+
                     reconnect();
                     break;
                 }
@@ -269,6 +277,11 @@ public class EthernetDataTracker implements NetworkStateTracker {
             runDhcp();
         }
         return mLinkUp;
+    }
+
+    @Override
+    public void captivePortalCheckComplete() {
+        // not implemented
     }
 
     /**

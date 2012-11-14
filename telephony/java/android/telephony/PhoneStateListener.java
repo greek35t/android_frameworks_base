@@ -27,6 +27,8 @@ import android.util.Log;
 
 import com.android.internal.telephony.IPhoneStateListener;
 
+import java.util.List;
+
 /**
  * A listener class for monitoring changes in specific telephony states
  * on the device, including service state, signal strength, message
@@ -160,7 +162,6 @@ public class PhoneStateListener {
      * Listen for changes to observed cell info.
      *
      * @see #onCellInfoChanged
-     * @hide pending API review
      */
     public static final int LISTEN_CELL_INFO = 0x00000400;
 
@@ -284,17 +285,11 @@ public class PhoneStateListener {
     }
 
     /**
-     * Callback invoked when a observed cell info gets changed.
-     *
-     * A notification should be sent when:
-     *     1. a cell is newly-observed.
-     *     2. a observed cell is not visible.
-     *     3. any of the cell info of a observed cell has changed.
-     *
-     * @hide pending API review
+     * Callback invoked when a observed cell info has changed,
+     * or new cells have been added or removed.
+     * @param cellInfo is the list of currently visible cells.
      */
-    public void onCellInfoChanged(CellInfo cellInfo) {
-        // default implementation empty
+    public void onCellInfoChanged(List<CellInfo> cellInfo) {
     }
 
     /**
@@ -346,8 +341,8 @@ public class PhoneStateListener {
             Message.obtain(mHandler, LISTEN_OTASP_CHANGED, otaspMode, 0).sendToTarget();
         }
 
-        public void onCellInfoChanged(CellInfo cellInfo) {
-            Message.obtain(mHandler, LISTEN_CELL_INFO, 0, 0).sendToTarget();
+        public void onCellInfoChanged(List<CellInfo> cellInfo) {
+            Message.obtain(mHandler, LISTEN_CELL_INFO, 0, 0, cellInfo).sendToTarget();
         }
     };
 
@@ -387,7 +382,7 @@ public class PhoneStateListener {
                     PhoneStateListener.this.onOtaspChanged(msg.arg1);
                     break;
                 case LISTEN_CELL_INFO:
-                    PhoneStateListener.this.onCellInfoChanged((CellInfo)msg.obj);
+                    PhoneStateListener.this.onCellInfoChanged((List<CellInfo>)msg.obj);
             }
         }
     };

@@ -49,6 +49,7 @@ public class WifiNative {
     static final int BLUETOOTH_COEXISTENCE_MODE_SENSE = 2;
 
     String mInterface = "";
+    private boolean mSuspendOptEnabled = false;
 
     public native static boolean loadDriver();
 
@@ -60,7 +61,7 @@ public class WifiNative {
 
     /* Sends a kill signal to supplicant. To be used when we have lost connection
        or when the supplicant is hung */
-    public native static boolean killSupplicant();
+    public native static boolean killSupplicant(boolean p2pSupported);
 
     private native boolean connectToSupplicant(String iface);
 
@@ -197,8 +198,22 @@ public class WifiNative {
         return null;
     }
 
+    /**
+     * Format of results:
+     * =================
+     * bssid=68:7f:74:d7:1b:6e
+     * freq=2412
+     * level=-43
+     * tsf=1344621975160944
+     * age=2623
+     * flags=[WPA2-PSK-CCMP][WPS][ESS]
+     * ssid=zubyb
+     *
+     * RANGE=ALL gets all scan results
+     * MASK=<N> see wpa_supplicant/src/common/wpa_ctrl.h for details
+     */
     public String scanResults() {
-        return doStringCommand("SCAN_RESULTS");
+        return doStringCommand("BSS RANGE=ALL MASK=0x1986");
     }
 
     public boolean startDriver() {
@@ -335,6 +350,8 @@ public class WifiNative {
     }
 
     public boolean setSuspendOptimizations(boolean enabled) {
+        if (mSuspendOptEnabled == enabled) return true;
+        mSuspendOptEnabled = enabled;
         if (enabled) {
             return doBooleanCommand("DRIVER SETSUSPENDMODE 1");
         } else {
@@ -366,6 +383,14 @@ public class WifiNative {
      */
     public String signalPoll() {
         return doStringCommand("SIGNAL_POLL");
+    }
+
+    /** Example outout:
+     * TXGOOD=396
+     * TXBAD=1
+     */
+    public String pktcntPoll() {
+        return doStringCommand("PKTCNT_POLL");
     }
 
     public boolean startWpsPbc(String bssid) {
@@ -476,6 +501,14 @@ public class WifiNative {
         } else {
             return doBooleanCommand("P2P_SET interface=" + iface + " ps 0");
         }
+    }
+
+    public boolean setWfdEnable(boolean enable) {
+        return doBooleanCommand("SET wifi_display " + (enable ? "1" : "0"));
+    }
+
+    public boolean setWfdDeviceInfo(String hex) {
+        return doBooleanCommand("WFD_SUBELEM_SET 0 " + hex);
     }
 
     /**
