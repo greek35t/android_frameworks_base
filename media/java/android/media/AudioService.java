@@ -181,9 +181,6 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
 
     private boolean mMediaServerOk;
 
-    private static final String ACTION_FMRx_PLUG = "ti.android.intent.action.FMRx_PLUG";
-    private static final String ACTION_FMTx_PLUG = "ti.android.intent.action.FMTx_PLUG";
-
     private SoundPool mSoundPool;
     private final Object mSoundEffectsLock = new Object();
     private static final int NUM_SOUNDPOOL_CHANNELS = 4;
@@ -439,8 +436,6 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
 
     private boolean mDockAudioMediaEnabled = true;
 
-    private int mDockState = Intent.EXTRA_DOCK_STATE_UNDOCKED;
-
     ///////////////////////////////////////////////////////////////////////////
     // Construction
     ///////////////////////////////////////////////////////////////////////////
@@ -508,10 +503,6 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
         intentFilter.addAction(Intent.ACTION_USB_AUDIO_ACCESSORY_PLUG);
         intentFilter.addAction(Intent.ACTION_USB_AUDIO_DEVICE_PLUG);
         intentFilter.addAction(Intent.ACTION_BOOT_COMPLETED);
-        if ( SystemProperties.OMAP_ENHANCEMENT) {
-           intentFilter.addAction(ACTION_FMRx_PLUG);
-           intentFilter.addAction(ACTION_FMTx_PLUG);
-        }
         intentFilter.addAction(Intent.ACTION_SCREEN_ON);
         intentFilter.addAction(Intent.ACTION_SCREEN_OFF);
         intentFilter.addAction(Intent.ACTION_USER_SWITCHED);
@@ -3333,13 +3324,6 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
                                 mBluetoothA2dpEnabled ?
                                         AudioSystem.FORCE_NONE : AudioSystem.FORCE_NO_BT_A2DP);
                     }
-
-                    synchronized (mSettingsLock) {
-                        AudioSystem.setForceUse(AudioSystem.FOR_DOCK,
-                                mDockAudioMediaEnabled ?
-                                        AudioSystem.FORCE_ANALOG_DOCK : AudioSystem.FORCE_NONE);
-                    }
-
                     // indicate the end of reconfiguration phase to audio HAL
                     AudioSystem.setParameters("restarting=false");
                     break;
@@ -3767,7 +3751,13 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
                         config = AudioSystem.FORCE_BT_CAR_DOCK;
                         break;
                     case Intent.EXTRA_DOCK_STATE_LE_DESK:
-                        config = AudioSystem.FORCE_ANALOG_DOCK;
+                        synchronized (mSettingsLock) {
+                            if (mDockAudioMediaEnabled) {
+                                config = AudioSystem.FORCE_ANALOG_DOCK;
+                            } else {
+                                config = AudioSystem.FORCE_NONE;
+                            }
+                        }
                         break;
                     case Intent.EXTRA_DOCK_STATE_HE_DESK:
                         config = AudioSystem.FORCE_DIGITAL_DOCK;
@@ -3776,14 +3766,8 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
                     default:
                         config = AudioSystem.FORCE_NONE;
                 }
-                // Low end docks have a menu to enable or disable audio
-                // (see mDockAudioMediaEnabled)
-                if (!((dockState == Intent.EXTRA_DOCK_STATE_LE_DESK) ||
-                      ((dockState == Intent.EXTRA_DOCK_STATE_UNDOCKED) &&
-                       (mDockState == Intent.EXTRA_DOCK_STATE_LE_DESK)))) {
-                    AudioSystem.setForceUse(AudioSystem.FOR_DOCK, config);
-                }
-                mDockState = dockState;
+
+                AudioSystem.setForceUse(AudioSystem.FOR_DOCK, config);
             } else if (action.equals(BluetoothHeadset.ACTION_CONNECTION_STATE_CHANGED)) {
                 state = intent.getIntExtra(BluetoothProfile.EXTRA_STATE,
                                                BluetoothProfile.STATE_DISCONNECTED);
@@ -3823,34 +3807,6 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
                             resetBluetoothSco();
                         }
                     }
-                }
-            } else if ( SystemProperties.OMAP_ENHANCEMENT && action.equals(ACTION_FMRx_PLUG)) {
-               state = intent.getIntExtra("state",0);
-               Log.i(TAG,"Broadcast Receiver: Got ACTION_FMRx_PLUG, state ="+state);
-               boolean isConnected =
-                   mConnectedDevices.containsKey(AudioSystem.DEVICE_IN_FM_RADIO_RX );
-               if (state == 0 && isConnected) {
-                      AudioSystem.setDeviceConnectionState(AudioSystem.DEVICE_IN_FM_RADIO_RX ,
-                               AudioSystem.DEVICE_STATE_UNAVAILABLE,"");
-                      mConnectedDevices.remove(AudioSystem.DEVICE_IN_FM_RADIO_RX );
-               } else if (state == 1 && !isConnected)  {
-                      AudioSystem.setDeviceConnectionState(AudioSystem.DEVICE_IN_FM_RADIO_RX ,
-                                AudioSystem.DEVICE_STATE_AVAILABLE,"");
-                      mConnectedDevices.put( new Integer(AudioSystem.DEVICE_IN_FM_RADIO_RX ), "");
-               }
-            } else if ( SystemProperties.OMAP_ENHANCEMENT && action.equals(ACTION_FMTx_PLUG)) {
-                state = intent.getIntExtra("state",0);
-                Log.i(TAG,"Broadcast Receiver: Got Action_FMTx_PLUG, state ="+state);
-                boolean isConnected =
-                   mConnectedDevices.containsKey(AudioSystem.DEVICE_OUT_FM_RADIO_TX );
-                if (state == 0 && isConnected) {
-                       AudioSystem.setDeviceConnectionState(AudioSystem.DEVICE_OUT_FM_RADIO_TX ,
-                                AudioSystem.DEVICE_STATE_UNAVAILABLE,"");
-                       mConnectedDevices.remove(AudioSystem.DEVICE_OUT_FM_RADIO_TX );
-                } else if (state == 1 && !isConnected)  {
-                       AudioSystem.setDeviceConnectionState(AudioSystem.DEVICE_OUT_FM_RADIO_TX ,
-                                 AudioSystem.DEVICE_STATE_AVAILABLE,"");
-                       mConnectedDevices.put( new Integer(AudioSystem.DEVICE_OUT_FM_RADIO_TX ), "");
                 }
             } else if (action.equals(Intent.ACTION_USB_AUDIO_ACCESSORY_PLUG) ||
                            action.equals(Intent.ACTION_USB_AUDIO_DEVICE_PLUG)) {
